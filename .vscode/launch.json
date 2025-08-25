@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug HireMe generate command",
+      "type": "python",
+      "request": "launch",
+      "module": "clg",                     // replace 'clg' with your actual module name if different
+      "args": [
+        "-G",
+        "--company", "SomeCompany",
+        "--role", "Developer"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
