@@ -13,6 +13,11 @@ dependencies = [
     "python-docx",
     "docx2pdf"
 ]
+license = {text = "MIT"}  
+
+classifiers = [
+    "License :: OSI Approved :: MIT License"  
+]
 
 [project.scripts]
 HireMe = "clg:main"
