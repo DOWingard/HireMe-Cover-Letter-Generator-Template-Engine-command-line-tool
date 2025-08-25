@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hireme-clg"
+version = "0.1"
+description = ""
+authors = [
+    { name = "Derek Wingard", email = "dwingard@uw.edu" }
+]
+dependencies = [
+    "python-docx",
+    "docx2pdf"
+]
+
+[project.scripts]
+HireMe = "clg:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["clg"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

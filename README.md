@@ -20,6 +20,62 @@ If theres only 1 template in the directory, omit the final command, and use:
 ```
 HireMe -G --company "COMPANY NAME" --role "COMPANY ROLE"
 ```
+## Best Practice:
+* Do not use slashes in your template names because it can cause path issues, just avoid in general for any input in this tool.
+* Quotes are not needed for string inputs, but if theres spaces in the input, use quotes.
+* 
+
+## Command List
+
+Configure the tool: 
+``` 
+HireMe --configure
+```
+
+Show current configuration:
+```
+HireMe --show
+```
+
+Generate a PDF [optional cmds]:  
+```
+HireMe HireMe -G --company "Big Company" --role "High Paying Job" [--date "00/00/00" --template "management1"]
+```
+
+Clear the configured storage folder:
+```
+HireMe --clean
+```
+
+Complete reset and reconfigure:
+```
+HireMe --reset
+```
+
+Add more templates to the tool and update template keys and {{LABELS}} [optional cmds]:
+```
+HireMe --update [--source /path/to/new/templates/folder]
+```
+
+Reset the {{LABELS}} used in the template, allows user to optionally add their own:
+```
+HireMe --resetlabels
+```
+
+Recreate the keywords assigned to each template:
+```
+HireMe --resetkwds
+```
+
+Read some crucial information:
+```
+HireMe --info
+```
+
+
+
+
+
 
 
 

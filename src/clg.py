@@ -44,6 +44,26 @@ def load_config():
 def configure():
     print("Configuring HireMe...")
 
+    if CONFIG_FILE.exists():
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                config = json.load(f)
+
+            required_keys = [
+                "storageLocation", "templateLocation",
+                "outputDocxLocation", "outputPdfLocation",
+                "templateKeywords", "swapWords"
+            ]
+
+            if all(k in config and config[k] for k in required_keys):
+                print("[!] Existing configuration detected.")
+                proceed = input("[?] Do you want to overwrite it? [Y]es/[N]o (Default=No): ").strip().lower()
+                if proceed not in ("y", "yes"):
+                    print("[✓] Configuration preserved. Exiting.")
+                    return
+        except Exception:
+            print("[!] Could not read existing config. Proceeding with fresh configuration...")
+
     storage_location = input("[1] Generator Files Folder Path: ").strip()
     if not os.path.exists(storage_location):
         print("[!] That path does not exist.")
@@ -62,20 +82,17 @@ def configure():
     os.makedirs(output_docx_dir, exist_ok=True)
     os.makedirs(output_pdf_dir, exist_ok=True)
 
-
     template_files = [f for f in os.listdir(template_location) if f.lower().endswith('.docx')]
     if not template_files:
         print("[!] No .docx files found in the template folder.")
         return
 
     print(f"Copying {len(template_files)} template files to {templates_dir}...")
-
     for file in template_files:
         src_path = os.path.join(template_location, file)
         dst_path = os.path.join(templates_dir, file)
         shutil.copyfile(src_path, dst_path)
     print("[✓] Copy complete.")
-
 
     template_map = {}
     for i, filename in enumerate(template_files, start=1):
@@ -84,6 +101,8 @@ def configure():
             keyword = input(prompt).strip()
             if keyword == "":
                 print("[!] A keyword is necessary. Please enter a valid keyword.")
+            elif keyword in template_map:
+                print("[!] Duplicate keyword. Please enter a unique one.")
             else:
                 template_map[keyword] = filename
                 break  
@@ -293,23 +312,54 @@ def show_config_summary():
         print("  [!] No templates configured.")
 
 
-
-
 def clear_template_keywords():
     if not CONFIG_FILE.exists():
-        print("[!] Config file not found, cannot clear keywords.")
+        print("[!] Config file not found, run HireMe --configure.")
         return
 
     with open(CONFIG_FILE, "r") as f:
         config = json.load(f)
 
-    if "templateKeywords" in config and config["templateKeywords"]:
-        config["templateKeywords"] = {}
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(config, f, indent=4)
-        print("[✓] Cleared all template keywords in configuration.")
-    else:
-        print("[!] No template keywords found to clear.")
+    template_location = config.get("templateLocation")
+    templates_dir = config.get("storageLocation")
+
+    if not template_location or not templates_dir:
+        print("[!] Invalid template or storage path in config.")
+        return
+
+    template_files = [f for f in os.listdir(template_location) if f.lower().endswith('.docx')]
+    if not template_files:
+        print("[!] No .docx files found in the template folder.")
+        return
+
+
+    config["templateKeywords"] = {}
+    print("[✓] Cleared all existing template keywords.")
+
+    template_map = {}
+    for i, filename in enumerate(template_files, start=1):
+        while True:
+            prompt = f"[>] Provide keyword for template {i} ('{filename}'): "
+            keyword = input(prompt).strip()
+            if not keyword:
+                print("[!] A keyword is necessary. Please enter a valid keyword.")
+            elif keyword in template_map:
+                print("[!] Duplicate keyword. Please enter a unique one.")
+            else:
+                template_map[keyword] = filename
+                break
+
+    if not template_map:
+        print("[!] No keywords assigned. Configuration aborted.")
+        return
+
+    config["templateKeywords"] = template_map
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(config, f, indent=4)
+
+    print("[✓] Template keywords reassigned and saved.")
+
+
 
 
 def reset_swap_words():
@@ -410,6 +460,11 @@ def validate_config(config):
 
 
 class CustomArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args, **kwargs):
+        if 'formatter_class' not in kwargs:
+            kwargs['formatter_class'] = WideHelpFormatter
+        super().__init__(*args, **kwargs)
+
     def error(self, message):
         args = sys.argv[1:]
 
@@ -422,7 +477,6 @@ class CustomArgumentParser(argparse.ArgumentParser):
             except Exception:
                 return False
 
-
             required_paths = [
                 "storageLocation",
                 "templateLocation",
@@ -433,7 +487,6 @@ class CustomArgumentParser(argparse.ArgumentParser):
                 val = config.get(key)
                 if not val or not isinstance(val, str) or val.strip() == "":
                     return False
-
                 if not os.path.exists(val):
                     return False
 
@@ -457,6 +510,11 @@ class CustomArgumentParser(argparse.ArgumentParser):
             super().error(message)
             print("[>] HireMe --help,-h ", file=sys.stderr)
 
+class WideHelpFormatter(argparse.HelpFormatter):
+    def __init__(self, prog):
+        super().__init__(prog, width=120)
+        self._max_help_position = 40 
+        self._indent_increment = 2
 
 
 ####################################################################################################
@@ -549,19 +607,22 @@ def main():
 
     parser = CustomArgumentParser(description="HireMe Cover Letter Generator")
 
-    parser.add_argument("-G", "--generate", action="store_true", help="Generate cover letter")
+    parser.add_argument("--show", action="store_true", help="Show current template keywords and placeholders")
     parser.add_argument("--configure", action="store_true", help="Configure HireMe with storage and template locations")
+    parser.add_argument("-G", "--generate", action="store_true", help="Generate cover letter") 
     parser.add_argument("--company", help="Company Name")
     parser.add_argument("--role", help="Role title")
     parser.add_argument("--date", help="Date [OPTIONAL, DEFAULT is today's date]")
+    parser.add_argument("-T", "--template", help="Template keyword to use when generating (required if multiple templates exist)")
     parser.add_argument("--clean", action="store_true", help="Clear the storage directory contents")
     parser.add_argument("--update", action="store_true", help="Scan for and import new templates")
-    parser.add_argument("-s", "--source", help="Optional custom path for template update (used with --update)")
+    parser.add_argument("-S", "--source", help="Optional custom path for template update (used with --update)")
     parser.add_argument("-L", "--resetlabels", action="store_true", help="Reset or clear the placeholder labels")
     parser.add_argument("-K", "--resetkwds", action="store_true", help="Clear all template keywords in configuration")
     parser.add_argument("--reset", action="store_true", help="Reset everything: clean, reconfigure, and reset placeholders")
-    parser.add_argument("-T", "--template", help="Template keyword to use when generating (required if multiple templates exist)")
-    parser.add_argument("--show", action="store_true", help="Show current template keywords and placeholders")
+    parser.add_argument('--info', action='store_true', help='objective truth')
+
+    
 
     args = parser.parse_args()
 
@@ -618,7 +679,18 @@ def main():
         configure()  
 
     
+    if args.info:
+        other_flags_used = any([
+            args.configure, args.generate, args.clean, args.update, args.reset,
+            args.resetlabels, args.resetkwds, args.company, args.role, args.date, args.template, args.source
+        ])
 
+        if other_flags_used:
+            print("[!] The --info flag must be used by itself.")
+            sys.exit(1)
+
+        print("\nPhysics is better than programming (FORTRAN >> C++)\n")
+        return
   
     if args.update or args.source:
         other_flags = any([
@@ -641,11 +713,24 @@ def main():
             print("[!] --resetlabels (-L) and --resetkwds (-K) can only be used together, with no other flags.")
             exit(1)
 
+        reset_parts = []
+        if args.resetkwds:
+            reset_parts.append("keywords")
+        if args.resetlabels:
+            reset_parts.append("{{LABELS}}")
+        
+        print(f"[!] This will reset the configured ({', '.join(reset_parts)}).")
+        confirm = input("[>] Continue? [Y]es/[N]o (Default=No): ").strip().lower()
+        if confirm not in ("y", "yes"):
+            print("[x] Operation aborted.")
+            return
+
         if args.resetkwds:
             clear_template_keywords()
         if args.resetlabels:
             reset_swap_words()
         return
+
 
 
     if args.show:
