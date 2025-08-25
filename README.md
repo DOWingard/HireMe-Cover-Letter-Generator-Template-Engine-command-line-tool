@@ -23,7 +23,6 @@ HireMe -G --company "COMPANY NAME" --role "COMPANY ROLE"
 ## Best Practice:
 * Do not use slashes in your template names because it can cause path issues, just avoid in general for any input in this tool.
 * Quotes are not needed for string inputs, but if theres spaces in the input, use quotes.
-* 
 
 ## Command List
 
