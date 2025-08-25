@@ -4,26 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hireme-clg"
-version = "0.1"
+version = "1.0.0"
 description = ""
+readme = "README.md"
 authors = [
     { name = "Derek Wingard", email = "dwingard@uw.edu" }
 ]
 dependencies = [
-    "python-docx",
-    "docx2pdf"
+    "python-docx>=1.2.0",
+    "docx2pdf>=0.1.8"
 ]
-license = {text = "MIT"}  
+license = { text = "MIT" }
 
 classifiers = [
-    "License :: OSI Approved :: MIT License"  
+    "License :: OSI Approved :: MIT License"
 ]
 
 [project.scripts]
 HireMe = "clg:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 py-modules = ["clg"]
 
 [tool.setuptools.packages.find]
