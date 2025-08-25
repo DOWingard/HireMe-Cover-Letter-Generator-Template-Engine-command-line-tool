@@ -23,7 +23,6 @@ HireMe -G --company "COMPANY NAME" --role "COMPANY ROLE"
 ## Best Practice:
 * Do not use slashes in your template names because it can cause path issues, just avoid in general for any input in this tool.
 * Quotes are not needed for string inputs, but if theres spaces in the input, use quotes.
-* 
 
 ## Command List
 
@@ -39,7 +38,7 @@ HireMe --show
 
 Generate a PDF [optional cmds]:  
 ```
-HireMe HireMe -G --company "Big Company" --role "High Paying Job" [--date "00/00/00" --template "management1"]
+HireMe -G --company "Big Company" --role "High Paying Job" [--date "00/00/00" --template "management1"]
 ```
 
 Clear the configured storage folder:
