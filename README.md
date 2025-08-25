@@ -38,7 +38,7 @@ HireMe --show
 
 Generate a PDF [optional cmds]:  
 ```
-HireMe HireMe -G --company "Big Company" --role "High Paying Job" [--date "00/00/00" --template "management1"]
+HireMe -G --company "Big Company" --role "High Paying Job" [--date "00/00/00" --template "management1"]
 ```
 
 Clear the configured storage folder:
