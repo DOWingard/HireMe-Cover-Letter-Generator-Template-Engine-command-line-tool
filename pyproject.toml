@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hireme-clg"
-version = "0.1"
+version = "1.0.0.0"
 description = ""
 authors = [
     { name = "Derek Wingard", email = "dwingard@uw.edu" }
