@@ -4,6 +4,13 @@ Do you hate writing cover letters as much as I do?  Build a template and automat
   
 This tool generates pdf fles by replacing as many labels within the text as your little heart desires (no seriously, add as many as you want)
 
+[![PyPI version](https://img.shields.io/pypi/v/hireme-clg.svg)](https://pypi.org/project/hireme-clg/)
+
+## Installation
+```
+pip install hireme-clg
+```
+
 ## Standard Usage:
 After installing HireMe, you must set your configuration:
 ```
